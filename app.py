@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from PIL import Image
+import uuid,os
 
 app = Flask(__name__)
 
@@ -11,10 +12,18 @@ def hello():
 def process_image():
     file = request.files['image']
     cate = request.form['category']
-    print(request.data)
-    # Read the image via file.stream
+    # Read the image via file.stream and save it in directory
     img = Image.open(file.stream)
-    img.save("api_image.jpg")
+    filename = str(uuid.uuid4())
+    filepath = os.path.join(os.getcwd(),cate)
+    if(os.path.exists(filepath)):
+        filepath = os.path.join(filepath,filename)+".jpg"
+        img.save(filepath)
+    else:
+        path = os.path.join(os.getcwd(),cate)
+        os.mkdir(path)
+        filepath = os.path.join(filepath,filename)+".jpg"
+        img.save(path,filename)
 
     return jsonify({'msg': 'success', 'size': [img.width, img.height],'cat': cate})
 
