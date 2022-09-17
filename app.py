@@ -20,10 +20,9 @@ def process_image():
         filepath = os.path.join(filepath,filename)+".jpg"
         img.save(filepath)
     else:
-        path = os.path.join(os.getcwd(),cate)
-        os.mkdir(path)
+        os.mkdir(filepath)
         filepath = os.path.join(filepath,filename)+".jpg"
-        img.save(path,filename)
+        img.save(filepath)
 
     return jsonify({'msg': 'success', 'size': [img.width, img.height],'cat': cate})
 
