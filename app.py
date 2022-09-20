@@ -24,7 +24,6 @@ def process_image():
             os.mkdir(filepath)
             filepath = os.path.join(filepath,filename)+".jpg"
             img.save(filepath)
-        raise Exception("Trial exception")
         return jsonify({'msg': 'success', 'size': [img.width, img.height],'cat': cate})
     except :
         return Response(
