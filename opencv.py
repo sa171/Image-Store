@@ -20,13 +20,14 @@ def process_image():
         img = Image.open(file.stream)
         img.save('InputImage/test.png')
         img = cv2.imread('InputImage/test.png')
-        img = cv2.bitwise_not(img)
-        img = cv2.resize(img,(28,28),interpolation = cv2.INTER_AREA)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        (threshold,bwImage) = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
+        img = cv2.resize(bwImage,(28,28),interpolation = cv2.INTER_AREA)
+        img = 1-img
         # predict number
         # E:\Courses\Mobile computing\mnist_nn model location
         print(tf.config.list_physical_devices('GPU'))
         model = keras.models.load_model('mnist_nn')
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         X_test = np.asarray(img)
         print(X_test.shape)
         X_test = X_test.reshape(1,784)
@@ -41,11 +42,11 @@ def process_image():
         filepath = os.path.join(os.getcwd(), str(cate))
         if (os.path.exists(filepath)):
             filepath = os.path.join(filepath, filename) + ".jpg"
-            img.save(filepath)
+            cv2.imwrite(filepath,img)
         else:
             os.mkdir(filepath)
             filepath = os.path.join(filepath, filename) + ".jpg"
-            img.save(filepath)
+            cv2.imwrite(filepath, img)
         return jsonify({'msg': 'success', 'size': [img.width, img.height], 'cat': str(cate)})
     except:
         return Response(
