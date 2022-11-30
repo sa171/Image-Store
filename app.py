@@ -3,6 +3,7 @@ from PIL import Image, ImageOps
 import keras
 import uuid, os
 import numpy as np
+import cv2
 import tensorflow as tf
 app = Flask(__name__)
 
@@ -17,19 +18,15 @@ def process_image():
 
     try:
         img = Image.open(file.stream)
-        img = ImageOps.grayscale(img)
-        img = img.resize((28, 28), Image.ANTIALIAS)
-        print(img.width)
-        print(img.height)
-
-            # img_inverted = Image.open('mnist_4.png')
-            # img_inverted = img_inverted.convert('L')
-            # img_inverted = img_inverted.resize((28, 28), Image.ANTIALIAS)
-            # img_inverted = ImageOps.invert(img)
-
+        img.save('InputImage/test.png')
+        img = cv2.imread('InputImage/test.png')
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        (threshold, bwImage) = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+        img = cv2.resize(bwImage, (28, 28), interpolation=cv2.INTER_AREA)
+        img = 1 - img
         # predict number
         # E:\Courses\Mobile computing\mnist_nn model location
-        print(tf.config.list_physical_devices('GPU'))
+        #print(tf.config.list_physical_devices('GPU'))
         model = keras.models.load_model('mnist_nn')
     #    img = ImageOps.invert(img)
         X_test = np.asarray(img)
@@ -46,12 +43,12 @@ def process_image():
         filepath = os.path.join(os.getcwd(), str(cate))
         if (os.path.exists(filepath)):
             filepath = os.path.join(filepath, filename) + ".jpg"
-            img.save(filepath)
+            cv2.imwrite(filepath,img)
         else:
             os.mkdir(filepath)
             filepath = os.path.join(filepath, filename) + ".jpg"
-            img.save(filepath)
-        return jsonify({'msg': 'success', 'size': [img.width, img.height], 'cat': str(cate)})
+            cv2.imwrite(filepath,img)
+        return jsonify({'msg': 'success', 'category_score': y_pred})
     except:
         return Response(
             "some issue with the server",
