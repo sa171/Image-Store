@@ -1,3 +1,5 @@
+import base64
+import io
 from flask import Flask, request, jsonify, Response
 from PIL import Image, ImageOps
 import keras
@@ -13,18 +15,12 @@ def hello():
 
 @app.route("/image/store", methods=["POST"])
 def process_image():
-    file = request.files['image']
+    file_data = base64.b64decode(request.json['image'])
+    file = Image.open(io.BytesIO(file_data))
     # Read the image via file.stream and save it in directory
 
     try:
-        img = Image.open(file.stream)
-        img.save('InputImage/test.png')
-        img = cv2.imread('InputImage/test.png')
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        (threshold, bwImage) = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
-        img = cv2.resize(bwImage, (28, 28), interpolation=cv2.INTER_AREA)
-        img = 1 - img
-        # predict number
+        img = file
         # E:\Courses\Mobile computing\mnist_nn model location
         #print(tf.config.list_physical_devices('GPU'))
         model = keras.models.load_model('mnist_nn')
@@ -48,8 +44,8 @@ def process_image():
             os.mkdir(filepath)
             filepath = os.path.join(filepath, filename) + ".jpg"
             cv2.imwrite(filepath,img)
-        return jsonify({'msg': 'success', 'size': [28, 28], 'cat': str(cate)});
-        # return jsonify({'msg': 'success', 'category_score': y_pred})
+        # return jsonify({'msg': 'success', 'size': [28, 28], 'cat': str(cate)});
+        return jsonify({'msg': 'success', 'category_score': y_pred})
     except:
         return Response(
             "some issue with the server",
