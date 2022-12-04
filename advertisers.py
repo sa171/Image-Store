@@ -48,7 +48,8 @@ def process_image():
             os.mkdir(filepath)
             filepath = os.path.join(filepath, filename) + ".jpg"
             cv2.imwrite(filepath,img)
-        return jsonify({'msg': 'success', 'category_score': y_pred})
+        return jsonify({'msg': 'success', 'size': [28, 28], 'cat': str(cate)});
+        # return jsonify({'msg': 'success', 'category_score': y_pred})
     except:
         return Response(
             "some issue with the server",
