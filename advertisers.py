@@ -1,12 +1,11 @@
 import base64
 import io
-from flask import Flask, request, jsonify, Response
-from PIL import Image, ImageOps
+
 import keras
-import uuid, os
 import numpy as np
-import cv2
-import tensorflow as tf
+from PIL import Image
+from flask import Flask, request, jsonify, Response
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -35,15 +34,6 @@ def process_image():
         print("y_pred = ", y_pred)
         cate = y_pred.argmax()
         print("cate = ",cate)
-        filename = str(uuid.uuid4())
-        filepath = os.path.join(os.getcwd(), str(cate))
-        if (os.path.exists(filepath)):
-            filepath = os.path.join(filepath, filename) + ".jpg"
-            cv2.imwrite(filepath,img)
-        else:
-            os.mkdir(filepath)
-            filepath = os.path.join(filepath, filename) + ".jpg"
-            cv2.imwrite(filepath,img)
         # return jsonify({'msg': 'success', 'size': [28, 28], 'cat': str(cate)});
         return jsonify({'msg': 'success', 'category_score': y_pred})
     except:
