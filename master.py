@@ -11,6 +11,7 @@ import tensorflow as tf
 import requests
 import base64
 from urllib3 import encode_multipart_formdata
+from numpyencoder import NumpyEncoder
 
 app = Flask(__name__)
 
@@ -30,6 +31,7 @@ def process_image():
         (threshold,bwImage) = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
         img = cv2.resize(bwImage,(28,28),interpolation = cv2.INTER_AREA)
         img = 1-img
+        cv2.imwrite('InputImage/test.jpg',img)
         # Divide images
         h, w = (28,28)
         half = w // 2
@@ -43,8 +45,8 @@ def process_image():
         cv2.imwrite('InputImage/top_right.jpg', top_right)
         cv2.imwrite('InputImage/bottom_left.jpg', bottom_left)
         cv2.imwrite('InputImage/bottom_right.jpg', bottom_right)
-        host_lst = ['http://192.168.0.97:5000/image/store','http://192.168.0.255:5000/image/store', 'http://192.168.0.97:5000/image/store',]
-        image_parts = ["top_left.jpg", "top_right.jpg"]
+        host_lst = ['http://192.168.0.169:5000/image/store','http://192.168.0.255:5000/image/store', 'http://192.168.0.97:5000/image/store',]
+        image_parts = ["top_left.jpg"]
         score_lst = []
         for i,img_name in enumerate(image_parts):
             # Reference https://betatim.github.io/posts/python-create-multipart-formdata/
@@ -54,7 +56,7 @@ def process_image():
             # body, header = encode_multipart_formdata(fields)
 
             # response = requests.post(host_lst[i],body)
-            with open("InputImage/top_left.jpg", "rb") as f:
+            with open("InputImage/test.jpg", "rb") as f:
                 im_bytes = f.read()
             encoded_string = base64.b64encode(im_bytes).decode('utf-8')
 
@@ -64,25 +66,14 @@ def process_image():
             payload = {"image":encoded_string}
             payload = json.dumps(payload)
             response = requests.post(host_lst[i], data=payload,headers=headers)
-            res = loads(response.json())
+            res = response.json()
             score_lst.append(res['confidence_score'])
         # predict number
         majority = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0}
         for val in score_lst:
-            majority[np.argmax(val)] += 1
+            majority[np.argmax(json.loads(val))] += 1
         cate = max(majority,key=majority.get)
         # E:\Courses\Mobile computing\mnist_nn model location
-        # print(tf.config.list_physical_devices('GPU'))
-        # model = keras.models.load_model('mnist_nn')
-        # X_test = np.asarray(img)
-        # print(X_test.shape)
-        # X_test = X_test.reshape(1,784)
-        # print(X_test)
-        # X_test = np.where(X_test < 100,0,X_test)
-        # print(X_test)
-        # y_pred = model.predict(X_test)
-        # print("y_pred = ", y_pred)
-        # cate = y_pred.argmax()
         print("cate = ",cate)
         filename = str(uuid.uuid4())
         filepath = os.path.join(os.getcwd(), str(cate))
