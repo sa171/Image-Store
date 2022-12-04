@@ -1,10 +1,11 @@
 import base64
 import io
-
+import json
 import keras
 import numpy as np
 from PIL import Image
 from flask import Flask, request, jsonify, Response
+from numpyencoder import NumpyEncoder
 
 app = Flask(__name__)
 
@@ -35,7 +36,7 @@ def process_image():
         cate = y_pred.argmax()
         print("cate = ",cate)
         # return jsonify({'msg': 'success', 'size': [28, 28], 'cat': str(cate)});
-        return jsonify({'msg': 'success', 'category_score': y_pred})
+        return jsonify({'msg': 'success', 'confidence_score': json.dumps(y_pred,cls=NumpyEncoder)})
     except:
         return Response(
             "some issue with the server",
