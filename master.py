@@ -1,17 +1,13 @@
+import base64
 import json
-from json import loads
+import os
+import uuid
 
 import cv2
-from flask import Flask, request, jsonify, Response
-from PIL import Image, ImageOps
-import keras
-import uuid, os
 import numpy as np
-import tensorflow as tf
 import requests
-import base64
-from urllib3 import encode_multipart_formdata
-from numpyencoder import NumpyEncoder
+from PIL import Image
+from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__)
 
