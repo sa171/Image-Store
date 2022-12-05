@@ -41,30 +41,21 @@ def process_image():
         cv2.imwrite('InputImage/top_right.jpg', top_right)
         cv2.imwrite('InputImage/bottom_left.jpg', bottom_left)
         cv2.imwrite('InputImage/bottom_right.jpg', bottom_right)
-        host_lst = ['http://192.168.0.169:5000/image/store','http://192.168.0.255:5000/image/store', 'http://192.168.0.97:5000/image/store',]
-        image_parts = ["top_left.jpg"]
+        host_lst = ['http://192.168.0.169:5000/image/store','http://192.168.0.214:5000/image/store', 'http://192.168.0.97:5000/image/store','http://192.168.0.126:5000/image/store']
+        image_parts = ["top_left.jpg","bottom_left.jpg","bottom_right.jpg","top_right.jpg"]
         score_lst = []
         for i,img_name in enumerate(image_parts):
             # Reference https://betatim.github.io/posts/python-create-multipart-formdata/
-            # fields = {
-            #     "image": (img_name, open("InputImage/"+img_name,'rb').read(), "image/png"),
-            # }
-            # body, header = encode_multipart_formdata(fields)
-
-            # response = requests.post(host_lst[i],body)
-            with open("InputImage/test.jpg", "rb") as f:
+            with open("InputImage/"+image_parts[i], "rb") as f:
                 im_bytes = f.read()
             encoded_string = base64.b64encode(im_bytes).decode('utf-8')
-
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-
-            #payload = json.loads(json.dumps(encoded_string))
             payload = {"image":encoded_string}
             payload = json.dumps(payload)
             response = requests.post(host_lst[i], data=payload,headers=headers)
             res = response.json()
             score_lst.append(res['confidence_score'])
-        # predict number
+        # predict number - Take Majority
         majority = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0}
         for val in score_lst:
             majority[np.argmax(json.loads(val))] += 1
@@ -88,4 +79,4 @@ def process_image():
         )
 
 if __name__ == "__main__":
-    app.run(host='192.168.0.214', port=5000)
+    app.run(host='192.168.0.225', port=5000)

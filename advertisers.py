@@ -18,7 +18,6 @@ def process_image():
     file_data = base64.b64decode(request.json['image'])
     file = Image.open(io.BytesIO(file_data))
     # Read the image via file.stream and save it in directory
-
     try:
         img = file
         # E:\Courses\Mobile computing\mnist_nn model location
